@@ -29,7 +29,7 @@ func (db *rootDB) createDatabase(ctx context.Context, name string) error {
 }
 
 func (db *rootDB) dropDatabase(ctx context.Context, name string) error {
-	query := fmt.Sprintf("DROP DATASE %q;", name)
+	query := fmt.Sprintf("DROP DATABASE %q;", name)
 	if _, err := db.db.Exec(ctx, query); err != nil {
 		return err
 	}
