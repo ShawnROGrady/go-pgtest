@@ -2,6 +2,10 @@ linters-settings:
   exhaustive:
     explicit-exhaustive-switch: true
 
+issues:
+  # Allow linters to run against examples.
+  exclude-dirs-use-default: false
+
 linters:
   enable:
     - exhaustive
