@@ -10,6 +10,8 @@ import (
 	"github.com/ShawnROGrady/go-pgtest/pgtest/connparams"
 )
 
+const testDBNamePrefix = "pg_test_"
+
 type testDBFactory struct {
 	paramFactory connparams.Factory
 
@@ -22,7 +24,7 @@ func (s *testDBFactory) randomDBName() string {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	return fmt.Sprintf("pg_test_%d", s.rng.Int())
+	return fmt.Sprintf("%s%d", testDBNamePrefix, s.rng.Int())
 }
 
 func (s *testDBFactory) createTestDB(ctx context.Context) (TestDB, error) {

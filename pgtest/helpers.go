@@ -164,3 +164,25 @@ func dropAllTables(ctx context.Context, q querier, args *dropAllTablesArgs) erro
 
 	return err
 }
+
+func getAllDatabases(ctx context.Context, q querier) ([]string, error) {
+	rows, err := q.Query(ctx, `SELECT datname FROM pg_database;`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var dbNames []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		dbNames = append(dbNames, name)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return dbNames, nil
+}

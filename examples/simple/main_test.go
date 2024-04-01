@@ -28,7 +28,7 @@ func initPgTestSupervisor() error {
 	pgtestSupervisorInitOnce.Do(func() {
 		pgtestSupervisor, err = pgtest.NewSupervisor(
 			context.Background(),
-			pgtest.WithResetOp(pgtest.DropAllTablesExcept("schema_migations")),
+			pgtest.WithResetOp(pgtest.TruncateAllTablesExcept("schema_migrations")),
 			pgtest.WithKeepDatabasesForFailed(*keepDatabasesForFailed),
 		)
 	})

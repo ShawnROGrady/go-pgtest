@@ -40,3 +40,7 @@ func (db *rootDB) dropDatabase(ctx context.Context, name string) error {
 
 	return nil
 }
+
+func (db *rootDB) getAllDatabases(ctx context.Context) ([]string, error) {
+	return getAllDatabases(ctx, db.db)
+}
