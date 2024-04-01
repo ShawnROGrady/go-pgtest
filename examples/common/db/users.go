@@ -13,6 +13,8 @@ func (q *pgxQueries) CreateUser(ctx context.Context, params CreateUserParams) (*
 				errReason = ErrorReasonUserEmailEmpty
 			case "users_name_not_empty":
 				errReason = ErrorReasonUserNameEmpty
+			case "users_email_key":
+				errReason = ErrorReasonDuplicateUserEmail
 			}
 		}
 

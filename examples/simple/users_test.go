@@ -56,6 +56,35 @@ func TestCreateUserSucces(t *testing.T) {
 	}
 }
 
+func TestCreateUserWithDuplicateEmail(t *testing.T) {
+	t.Parallel()
+
+	var (
+		ctx = context.Background()
+		cl  = NewTestClient(t)
+
+		// Input attributes.
+		email = "foo@example.com"
+	)
+
+	// Add a user with the email.
+	_, err := cl.CreateUser(ctx, db.CreateUserParams{
+		Email: email,
+		Name:  "first",
+	})
+	require.NoError(t, err, "failed to create first user")
+
+	// Attempt to add another user with the same email.
+	user2, err := cl.CreateUser(ctx, db.CreateUserParams{
+		Email: email,
+		Name:  "second",
+	})
+	require.Errorf(t, err, "unexpectedly no error crating second user; created %#v", user2)
+
+	// Verify the expected error is returned.
+	assert.ErrorIs(t, err, &db.QueryError{Reason: db.ErrorReasonDuplicateUserEmail}, "unexpected error value returned creating second user")
+}
+
 func TestCreateUserConstraintViolations(t *testing.T) {
 	t.Parallel()
 

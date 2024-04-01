@@ -13,7 +13,7 @@ type supervisor struct {
 	resetOp ResetTestDBOp
 }
 
-func newSupervisor(factory *testDBFactory, opts ...Option) *supervisor {
+func newSupervisor(factory *testDBFactory) *supervisor {
 	resourceConf := &pool.ResourceConf[TestDB]{
 		Create: func(ctx context.Context) (TestDB, error) {
 			return factory.createTestDB(ctx)
@@ -24,17 +24,11 @@ func newSupervisor(factory *testDBFactory, opts ...Option) *supervisor {
 	}
 	pool := pool.New[TestDB](resourceConf)
 
-	s := &supervisor{
+	return &supervisor{
 		factory: factory,
 		pool:    pool,
 		resetOp: DropAllTables(),
 	}
-
-	for _, opt := range opts {
-		opt.apply(s)
-	}
-
-	return s
 }
 
 func (s *supervisor) shutdown(ctx context.Context) error {

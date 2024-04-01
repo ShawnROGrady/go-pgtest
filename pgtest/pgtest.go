@@ -3,6 +3,7 @@ package pgtest
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"testing"
 	"time"
@@ -37,15 +38,22 @@ func newTestDBFactory(ctx context.Context) (*testDBFactory, error) {
 	}, nil
 }
 
+// A Supervisor is used to manage databases for use in a test suite.
 type Supervisor interface {
+	// GetTestDB returns a db for use in testing.
 	GetTestDB(t testing.TB) TestDB
+
+	// Shutdown shuts down the supervisor, dropping any test databases it
+	// owns.
 	Shutdown(ctx context.Context) error
 }
 
 type testSupervisor struct {
-	inner *supervisor
+	inner                  *supervisor
+	keepDatabasesForFailed bool
 }
 
+// GetTestDB returns a db for use in testing.
 func (s *testSupervisor) GetTestDB(t testing.TB) TestDB {
 	ctx := context.Background()
 	dbResource, err := s.inner.getTestDB(ctx)
@@ -54,25 +62,54 @@ func (s *testSupervisor) GetTestDB(t testing.TB) TestDB {
 	}
 
 	t.Cleanup(func() {
+		if t.Failed() && s.keepDatabasesForFailed {
+			dbResource.Hijack()
+			t.Logf("keeping test db: %s", dbResource.Data().name())
+			return
+		}
+
 		dbResource.Release()
 	})
 	return dbResource.Data()
 }
 
+// Shutdown shuts down the supervisor, dropping any test databases it owns.
 func (s *testSupervisor) Shutdown(ctx context.Context) error {
 	return s.inner.shutdown(ctx)
 }
 
+// NewSupervisor returns a new supervisor, which maintains a pool of test
+// databases for use in testing.
 func NewSupervisor(ctx context.Context, opts ...Option) (Supervisor, error) {
 	factory, err := newTestDBFactory(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	inner := newSupervisor(factory, opts...)
-	return &testSupervisor{inner: inner}, nil
+	inner := newSupervisor(factory)
+	s := &testSupervisor{inner: inner}
+
+	for _, opt := range opts {
+		opt.apply(s)
+	}
+
+	return s, nil
 }
 
+func RunMain(ctx context.Context, m *testing.M, supervisor Supervisor) (code int) {
+	defer func() {
+		if err := supervisor.Shutdown(ctx); err != nil {
+			log.Printf("ERROR: pgtest: shutdown pgtest supervisor: %s", err)
+			if code == 0 {
+				code = 11
+			}
+		}
+	}()
+
+	return m.Run()
+}
+
+// NewTestDB returns a brand new TestDB that is dropped at the end of the test.
 func NewTestDB(t testing.TB) TestDB {
 	ctx := context.Background()
 

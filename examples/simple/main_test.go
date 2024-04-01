@@ -2,6 +2,7 @@ package simple
 
 import (
 	"context"
+	"flag"
 	"log"
 	"os"
 	"sync"
@@ -10,6 +11,10 @@ import (
 	"github.com/ShawnROGrady/go-pgtest/examples/common/db"
 	"github.com/ShawnROGrady/go-pgtest/pgtest"
 	"github.com/stretchr/testify/require"
+)
+
+var (
+	keepDatabasesForFailed = flag.Bool("keep-databases-for-failed", false, "keep test databases for failed tests")
 )
 
 var (
@@ -24,6 +29,7 @@ func initPgTestSupervisor() error {
 		pgtestSupervisor, err = pgtest.NewSupervisor(
 			context.Background(),
 			pgtest.WithResetOp(pgtest.DropAllTablesExcept("schema_migations")),
+			pgtest.WithKeepDatabasesForFailed(*keepDatabasesForFailed),
 		)
 	})
 
@@ -48,18 +54,10 @@ func TestMain(m *testing.M) {
 		ctx = context.Background()
 	)
 
+	flag.Parse()
+
 	if err := initPgTestSupervisor(); err != nil {
 		log.Fatalf("initialize pgtest supervisor: %s", err)
 	}
-	code := m.Run()
-
-	if err := pgtestSupervisor.Shutdown(ctx); err != nil {
-		if code == 0 {
-			log.Fatalf("shutdown pgtest supervisor: %s", err)
-		} else {
-			log.Printf("shutdown pgtest supervisor: %s", err)
-		}
-	}
-
-	os.Exit(code)
+	os.Exit(pgtest.RunMain(ctx, m, pgtestSupervisor))
 }

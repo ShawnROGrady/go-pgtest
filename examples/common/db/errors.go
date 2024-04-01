@@ -15,6 +15,7 @@ type ErrorReason uint
 const (
 	ErrorReasonUnknown ErrorReason = iota
 	ErrorReasonUserNotFound
+	ErrorReasonDuplicateUserEmail
 	ErrorReasonUserEmailEmpty
 	ErrorReasonUserNameEmpty
 	ErrorReasonTaskNotFound
@@ -29,6 +30,8 @@ func (e ErrorReason) String() string {
 	switch e {
 	case ErrorReasonUserNotFound:
 		return "user not found"
+	case ErrorReasonDuplicateUserEmail:
+		return "duplicate user email"
 	case ErrorReasonUserEmailEmpty:
 		return "user email empty"
 	case ErrorReasonUserNameEmpty:
