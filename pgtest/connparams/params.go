@@ -74,16 +74,16 @@ func New(dbName string, opts ...Option) *ConnectionParams {
 type Factory func(dbName string, opts ...Option) *ConnectionParams
 
 func DefaultFactory() Factory {
-	p := new(ConnectionParams)
-	p.setHost(defaultHost)
-	p.setPort(defaultPort)
-	p.setSSLMode(defaultSSLMode)
-
-	if u := os.Getenv("USER"); u != "" {
-		p.setUser(u)
-	}
-
 	return func(dbName string, opts ...Option) *ConnectionParams {
+		p := new(ConnectionParams)
+		p.setHost(defaultHost)
+		p.setPort(defaultPort)
+		p.setSSLMode(defaultSSLMode)
+
+		if u := os.Getenv("USER"); u != "" {
+			p.setUser(u)
+		}
+
 		p.dbName = dbName
 		for _, opt := range opts {
 			opt.apply(p)

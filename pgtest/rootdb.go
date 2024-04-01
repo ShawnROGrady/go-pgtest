@@ -14,6 +14,10 @@ type rootDB struct {
 	db *pgxpool.Pool
 }
 
+func (db *rootDB) close() {
+	db.db.Close()
+}
+
 func (db *rootDB) createDatabase(ctx context.Context, name string) error {
 	query := fmt.Sprintf("CREATE DATABASE %q;", name)
 	if _, err := db.db.Exec(ctx, query); err != nil {

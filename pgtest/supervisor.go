@@ -2,55 +2,62 @@ package pgtest
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"math/rand"
-	"sync"
 
-	"github.com/ShawnROGrady/go-pgtest/pgtest/connparams"
+	"github.com/ShawnROGrady/go-pgtest/pgtest/internal/pool"
 )
 
 type supervisor struct {
-	paramFactory connparams.Factory
-
-	rootDB *rootDB
-	mut    sync.Mutex
-	rng    *rand.Rand
+	factory *testDBFactory
+	pool    *pool.Pool[TestDB]
+	resetOp ResetTestDBOp
 }
 
-func (s *supervisor) randomDBName() string {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func newSupervisor(factory *testDBFactory, opts ...Option) *supervisor {
+	resourceConf := &pool.ResourceConf[TestDB]{
+		Create: func(ctx context.Context) (TestDB, error) {
+			return factory.createTestDB(ctx)
+		},
+		Destroy: func(testDB TestDB) error {
+			return factory.destroyTestDB(context.Background(), testDB)
+		},
+	}
+	pool := pool.New[TestDB](resourceConf)
 
-	return fmt.Sprintf("pg_test_%d", s.rng.Int())
-}
-
-func (s *supervisor) createTestDB(ctx context.Context) (*testDB, error) {
-	var (
-		retryCount = 5
-		err        error
-	)
-
-	for retryCount > 0 {
-		dbName := s.randomDBName()
-
-		err = s.rootDB.createDatabase(ctx, dbName)
-		if err == nil {
-			return &testDB{
-				connparams: s.paramFactory(dbName),
-			}, nil
-		}
-
-		if !errors.Is(err, &databaseAlreadyExistsWithName{name: dbName}) {
-			break
-		}
-
-		retryCount--
+	s := &supervisor{
+		factory: factory,
+		pool:    pool,
+		resetOp: DropAllTables(),
 	}
 
-	return nil, err
+	for _, opt := range opts {
+		opt.apply(s)
+	}
+
+	return s
 }
 
-func (s *supervisor) destroyTestDB(ctx context.Context, testDB TestDB) error {
-	return s.rootDB.dropDatabase(ctx, testDB.name())
+func (s *supervisor) shutdown(ctx context.Context) error {
+	if err := s.pool.Close(ctx); err != nil {
+		s.factory.close()
+		return err
+	}
+
+	s.factory.close()
+	return nil
+}
+
+func (s *supervisor) getTestDB(ctx context.Context) (*pool.Resource[TestDB], error) {
+	db, err := s.pool.Acquire(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("acquire: %w", err)
+	}
+
+	if s.resetOp != nil {
+		if err := runResetTestDBOp(ctx, s.resetOp, db.Data()); err != nil {
+			return nil, fmt.Errorf("reset test db: %w", err)
+		}
+	}
+
+	return db, nil
 }
