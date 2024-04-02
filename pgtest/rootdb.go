@@ -33,12 +33,7 @@ func (db *rootDB) createDatabase(ctx context.Context, name string) error {
 }
 
 func (db *rootDB) dropDatabase(ctx context.Context, name string) error {
-	query := fmt.Sprintf("DROP DATABASE %q;", name)
-	if _, err := db.db.Exec(ctx, query); err != nil {
-		return err
-	}
-
-	return nil
+	return dropDatabase(ctx, db.db, name)
 }
 
 func (db *rootDB) getAllDatabases(ctx context.Context) ([]string, error) {

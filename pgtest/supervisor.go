@@ -13,7 +13,7 @@ type supervisor struct {
 	resetOp ResetTestDBOp
 }
 
-func newSupervisor(factory *testDBFactory) *supervisor {
+func newSupervisor(conf *config, factory *testDBFactory) *supervisor {
 	resourceConf := &pool.ResourceConf[TestDB]{
 		Create: func(ctx context.Context) (TestDB, error) {
 			return factory.createTestDB(ctx)
@@ -27,7 +27,7 @@ func newSupervisor(factory *testDBFactory) *supervisor {
 	return &supervisor{
 		factory: factory,
 		pool:    pool,
-		resetOp: DropAllTables(),
+		resetOp: conf.resetOp,
 	}
 }
 

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/ShawnROGrady/go-pgtest/pgtest/connparams"
@@ -60,4 +62,23 @@ func (s *testDBFactory) destroyTestDB(ctx context.Context, testDB TestDB) error 
 
 func (s *testDBFactory) close() {
 	s.rootDB.close()
+}
+
+func (s *testDBFactory) destroyAllTestDBs(ctx context.Context) error {
+	dbNames, err := s.rootDB.getAllDatabases(ctx)
+	if err != nil {
+		return fmt.Errorf("get all databases: %w", err)
+	}
+
+	toDrop := slices.DeleteFunc(dbNames, func(name string) bool {
+		return !strings.HasPrefix(name, testDBNamePrefix)
+	})
+
+	for _, dbName := range toDrop {
+		if err := s.rootDB.dropDatabase(ctx, dbName); err != nil {
+			return fmt.Errorf("drop database %q: %w", dbName, err)
+		}
+	}
+
+	return nil
 }

@@ -16,6 +16,15 @@ type querier interface {
 	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
 }
 
+func dropDatabase(ctx context.Context, q querier, name string) error {
+	query := fmt.Sprintf("DROP DATABASE %q;", name)
+	if _, err := q.Exec(ctx, query); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type pgTable struct {
 	name  string
 	owner string

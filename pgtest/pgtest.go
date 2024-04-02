@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -14,14 +16,69 @@ import (
 
 const defaultRootDBName = "postgres"
 
-func pgTestParamFactory() connparams.Factory {
-	// TODO: let this be overridden.
-	return connparams.DefaultFactory()
+func newConfig(opts ...Option) (*config, error) {
+	var connParamOpts []connparams.Option
+
+	if host := os.Getenv("PGTEST_HOST"); host != "" {
+		connParamOpts = append(connParamOpts, connparams.WithHost(host))
+	}
+
+	if portRaw := os.Getenv("PGTEST_PORT"); portRaw != "" {
+		port, err := strconv.Atoi(portRaw)
+		if err != nil {
+			return nil, fmt.Errorf("parse PGTEST_PORT %q: %w", portRaw, err)
+		}
+
+		connParamOpts = append(connParamOpts, connparams.WithPort(port))
+	}
+
+	if u := os.Getenv("PGTEST_USER"); u != "" {
+		connParamOpts = append(connParamOpts, connparams.WithUser(u))
+	}
+
+	if p := os.Getenv("PGTEST_PASSWORD"); p != "" {
+		connParamOpts = append(connParamOpts, connparams.WithPassword(p))
+	}
+
+	paramFactory := connparams.Factory(func(dbName string, opts ...connparams.Option) *connparams.ConnectionParams {
+		return connparams.DefaultFactory()(dbName, connParamOpts...)
+	})
+
+	var keepDatabasesForFailed bool
+	if o := os.Getenv("PG_TEST_KEEP_DATABASES_FOR_FAILED"); o != "" {
+		var err error
+		keepDatabasesForFailed, err = strconv.ParseBool(o)
+		if err != nil {
+			return nil, fmt.Errorf("parse PG_TEST_KEEP_DATABASES_FOR_FAILED %q: %w", o, err)
+		}
+	}
+
+	var keepExistingTestDBs bool
+	if o := os.Getenv("PG_TEST_KEEP_EXISTING_TEST_DBS"); o != "" {
+		var err error
+		keepExistingTestDBs, err = strconv.ParseBool(o)
+		if err != nil {
+			return nil, fmt.Errorf("parse PG_TEST_KEEP_EXISTING_TEST_DBS %q: %w", o, err)
+		}
+	}
+
+	c := &config{
+		resetOp:                DropAllTables(),
+		keepDatabasesForFailed: keepDatabasesForFailed,
+		keepExistingTestDBs:    keepExistingTestDBs,
+		paramFactory:           paramFactory,
+	}
+
+	for _, opt := range opts {
+		opt.apply(c)
+	}
+
+	return c, nil
 }
 
-func newTestDBFactory(ctx context.Context) (*testDBFactory, error) {
+func newTestDBFactory(ctx context.Context, conf *config) (*testDBFactory, error) {
 	var (
-		paramFactory = pgTestParamFactory()
+		paramFactory = conf.paramFactory
 		rootDBName   = defaultRootDBName
 	)
 
@@ -51,6 +108,7 @@ type Supervisor interface {
 type testSupervisor struct {
 	inner                  *supervisor
 	keepDatabasesForFailed bool
+	keepExistingTestDBs    bool
 }
 
 // GetTestDB returns a db for use in testing.
@@ -81,16 +139,27 @@ func (s *testSupervisor) Shutdown(ctx context.Context) error {
 // NewSupervisor returns a new supervisor, which maintains a pool of test
 // databases for use in testing.
 func NewSupervisor(ctx context.Context, opts ...Option) (Supervisor, error) {
-	factory, err := newTestDBFactory(ctx)
+	conf, err := newConfig(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	inner := newSupervisor(factory)
-	s := &testSupervisor{inner: inner}
+	factory, err := newTestDBFactory(ctx, conf)
+	if err != nil {
+		return nil, err
+	}
 
-	for _, opt := range opts {
-		opt.apply(s)
+	inner := newSupervisor(conf, factory)
+	s := &testSupervisor{
+		inner:                  inner,
+		keepDatabasesForFailed: conf.keepDatabasesForFailed,
+		keepExistingTestDBs:    conf.keepExistingTestDBs,
+	}
+
+	if !s.keepExistingTestDBs {
+		if err := factory.destroyAllTestDBs(ctx); err != nil {
+			return nil, fmt.Errorf("destroy old test dbs: %w", err)
+		}
 	}
 
 	return s, nil
@@ -113,7 +182,12 @@ func RunMain(ctx context.Context, m *testing.M, supervisor Supervisor) (code int
 func NewTestDB(t testing.TB) TestDB {
 	ctx := context.Background()
 
-	state, err := newTestDBFactory(ctx)
+	conf, err := newConfig()
+	if err != nil {
+		t.Fatalf("load config: %s", err)
+	}
+
+	state, err := newTestDBFactory(ctx, conf)
 	if err != nil {
 		t.Fatalf("create supervisor state: %s", err)
 	}

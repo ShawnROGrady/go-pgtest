@@ -23,7 +23,9 @@ func runResetTestDBOp(ctx context.Context, op ResetTestDBOp, testDB TestDB) erro
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	if err := op.run(ctx, tx); err != nil {
 		return err
