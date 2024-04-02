@@ -26,7 +26,7 @@ type config struct {
 	// test databases to clean up any test databases that weren't
 	// previously dropped (such as if keepDatabasesForFailed was specified
 	// or if the supervisor didn't shutdown correctly).
-	keepExistingTestDBs bool
+	//keepExistingTestDBs bool
 
 	paramFactory connparams.Factory
 }

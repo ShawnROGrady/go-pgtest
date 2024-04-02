@@ -53,20 +53,22 @@ func newConfig(opts ...Option) (*config, error) {
 		}
 	}
 
-	var keepExistingTestDBs bool
-	if o := os.Getenv("PG_TEST_KEEP_EXISTING_TEST_DBS"); o != "" {
-		var err error
-		keepExistingTestDBs, err = strconv.ParseBool(o)
-		if err != nil {
-			return nil, fmt.Errorf("parse PG_TEST_KEEP_EXISTING_TEST_DBS %q: %w", o, err)
+	/*
+		var keepExistingTestDBs bool
+		if o := os.Getenv("PG_TEST_KEEP_EXISTING_TEST_DBS"); o != "" {
+			var err error
+			keepExistingTestDBs, err = strconv.ParseBool(o)
+			if err != nil {
+				return nil, fmt.Errorf("parse PG_TEST_KEEP_EXISTING_TEST_DBS %q: %w", o, err)
+			}
 		}
-	}
+	*/
 
 	c := &config{
 		resetOp:                DropAllTables(),
 		keepDatabasesForFailed: keepDatabasesForFailed,
-		keepExistingTestDBs:    keepExistingTestDBs,
-		paramFactory:           paramFactory,
+		//keepExistingTestDBs:    keepExistingTestDBs,
+		paramFactory: paramFactory,
 	}
 
 	for _, opt := range opts {
@@ -108,7 +110,6 @@ type Supervisor interface {
 type testSupervisor struct {
 	inner                  *supervisor
 	keepDatabasesForFailed bool
-	keepExistingTestDBs    bool
 }
 
 // GetTestDB returns a db for use in testing.
@@ -153,14 +154,15 @@ func NewSupervisor(ctx context.Context, opts ...Option) (Supervisor, error) {
 	s := &testSupervisor{
 		inner:                  inner,
 		keepDatabasesForFailed: conf.keepDatabasesForFailed,
-		keepExistingTestDBs:    conf.keepExistingTestDBs,
 	}
 
-	if !s.keepExistingTestDBs {
-		if err := factory.destroyAllTestDBs(ctx); err != nil {
-			return nil, fmt.Errorf("destroy old test dbs: %w", err)
+	/*
+		if !s.keepExistingTestDBs {
+			if err := factory.destroyAllTestDBs(ctx); err != nil {
+				return nil, fmt.Errorf("destroy old test dbs: %w", err)
+			}
 		}
-	}
+	*/
 
 	return s, nil
 }

@@ -30,7 +30,6 @@ func initPgTestSupervisor() error {
 			context.Background(),
 			pgtest.WithResetOp(pgtest.TruncateAllTablesExcept("schema_migrations")),
 			pgtest.WithKeepDatabasesForFailed(*keepDatabasesForFailed),
-			pgtest.WithKeepExistingTestDBs(true),
 		)
 	})
 

@@ -21,7 +21,6 @@ func (test *DBTestSuite) SetupSuite() {
 	pgtestSupervisor, err := pgtest.NewSupervisor(
 		context.Background(),
 		pgtest.WithResetOp(pgtest.TruncateAllTablesExcept("schema_migrations")),
-		pgtest.WithKeepExistingTestDBs(true),
 	)
 	test.Require().NoError(err, "unexpected error initializing supervisor")
 	test.supervisor = pgtestSupervisor

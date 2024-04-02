@@ -37,6 +37,7 @@ func KeepDatabasesForFailed() Option {
 	return WithKeepDatabasesForFailed(true)
 }
 
+/*
 // WithKeepExistingTestDBs returns an option which controls whether or not to
 // keep old test databases that were not previously dropped by the supervisor.
 func WithKeepExistingTestDBs(v bool) Option {
@@ -57,3 +58,4 @@ func WithKeepExistingTestDBs(v bool) Option {
 func KeepExistingTestDBs() Option {
 	return WithKeepExistingTestDBs(true)
 }
+*/
