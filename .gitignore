@@ -1,2 +1,12 @@
+# Local go workspace.
 go.work
 go.work.sum
+
+# Coverage output.
+*.out
+
+# Binaries.
+bin
+
+# MacOS files.
+.DS_Store
