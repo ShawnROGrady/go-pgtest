@@ -5,7 +5,7 @@ go 1.21.6
 replace github.com/ShawnROGrady/go-pgtest => ../
 
 require (
-	github.com/ShawnROGrady/go-pgtest v0.1.0
+	github.com/ShawnROGrady/go-pgtest v0.2.0
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/google/go-cmp v0.6.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
