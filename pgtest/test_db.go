@@ -14,7 +14,7 @@ type TestDB interface {
 }
 
 type testDB struct {
-	connparams *connparams.ConnectionParams
+	connparams connparams.ConnectionParams
 }
 
 func (db *testDB) isTestDB() {}

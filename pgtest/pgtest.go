@@ -40,8 +40,8 @@ func newConfig(opts ...Option) (*config, error) {
 		connParamOpts = append(connParamOpts, connparams.WithPassword(p))
 	}
 
-	paramFactory := func(dbName string) *connparams.ConnectionParams {
-		return connparams.DefaultFactory()(dbName, connParamOpts...)
+	paramFactory := func(dbName string) connparams.ConnectionParams {
+		return connparams.NewWithDefaults(dbName, connParamOpts...)
 	}
 
 	var keepDatabasesForFailed bool

@@ -41,7 +41,7 @@ func TestDBFactoryCreateTestDBImmediateSuccess(t *testing.T) {
 		host = "localhost"
 		port = 5432
 
-		paramFactory = func(dbName string) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) connparams.ConnectionParams {
 			return connparams.New(
 				dbName,
 				connparams.WithUser(user),
@@ -91,10 +91,7 @@ func TestDBFactoryCreateTestDBImmediateSuccess(t *testing.T) {
 
 	if diff := cmp.Diff(
 		created, expectedCreated,
-		cmp.AllowUnexported(testDB{}, connparams.ConnectionParams{}),
-		cmp.Transformer("testDB.ConnectionParams.URI", func(p connparams.ConnectionParams) string {
-			return p.URI().String()
-		}),
+		cmp.AllowUnexported(testDB{}),
 	); diff != "" {
 		t.Errorf("unexpected created TestDB (-got, +want):\n%s", diff)
 	}
@@ -115,7 +112,7 @@ func TestDBFactoryCreateTestDBSucceedsSecondTime(t *testing.T) {
 		host = "localhost"
 		port = 5432
 
-		paramFactory = func(dbName string) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) connparams.ConnectionParams {
 			return connparams.New(
 				dbName,
 				connparams.WithUser(user),
@@ -176,10 +173,7 @@ func TestDBFactoryCreateTestDBSucceedsSecondTime(t *testing.T) {
 
 	if diff := cmp.Diff(
 		created, expectedCreated,
-		cmp.AllowUnexported(testDB{}, connparams.ConnectionParams{}),
-		cmp.Transformer("testDB.ConnectionParams.URI", func(p connparams.ConnectionParams) string {
-			return p.URI().String()
-		}),
+		cmp.AllowUnexported(testDB{}),
 	); diff != "" {
 		t.Errorf("unexpected created TestDB (-got, +want):\n%s", diff)
 	}
@@ -200,7 +194,7 @@ func TestDBFactoryCreateTestDBEventuallyFailsOnAlreadyExists(t *testing.T) {
 		host = "localhost"
 		port = 5432
 
-		paramFactory = func(dbName string) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) connparams.ConnectionParams {
 			return connparams.New(
 				dbName,
 				connparams.WithUser(user),
@@ -268,7 +262,7 @@ func TestDBFactoryDestroyTestDBSuccess(t *testing.T) {
 		randSource = new(sequentialRandSource)
 		rng        = rand.New(randSource)
 
-		paramFactory = func(dbName string) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) connparams.ConnectionParams {
 			return connparams.New(dbName, connparams.WithUser("foo"), connparams.WithHost("localhost"), connparams.WithPort(5432))
 		}
 
@@ -321,7 +315,7 @@ func TestDBFactoryDestroyAllTestDBsSuccess(t *testing.T) {
 		randSource = new(sequentialRandSource)
 		rng        = rand.New(randSource)
 
-		paramFactory = func(dbName string) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) connparams.ConnectionParams {
 			return connparams.New(dbName, connparams.WithUser("foo"), connparams.WithHost("localhost"), connparams.WithPort(5432))
 		}
 

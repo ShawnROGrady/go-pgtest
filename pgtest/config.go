@@ -6,7 +6,7 @@ import "github.com/ShawnROGrady/go-pgtest/pgtest/connparams"
 // particular database name. This is to allow us to get common information for
 // connecting to the postgres server (e.g. host, port, etc.) once then easily
 // re-use that information to connect to different databases.
-type connparamsFactory func(dbName string) *connparams.ConnectionParams
+type connparamsFactory func(dbName string) connparams.ConnectionParams
 
 // config describes the configuration for pgtest.
 type config struct {
