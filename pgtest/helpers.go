@@ -174,7 +174,6 @@ func dropAllTables(ctx context.Context, q querier, args *dropAllTablesArgs) erro
 	return err
 }
 
-//nolint:unused
 func getAllDatabases(ctx context.Context, q querier) ([]string, error) {
 	rows, err := q.Query(ctx, `SELECT datname FROM pg_database;`)
 	if err != nil {

@@ -6,12 +6,20 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type pgPool interface {
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	Close()
+	Config() *pgxpool.Config
+}
+
 type rootDB struct {
-	db *pgxpool.Pool
+	db pgPool
 }
 
 func (db *rootDB) close() {
@@ -22,7 +30,7 @@ func (db *rootDB) createDatabase(ctx context.Context, name string) error {
 	query := fmt.Sprintf("CREATE DATABASE %q;", name)
 	if _, err := db.db.Exec(ctx, query); err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.DuplicateDatabase {
 			return &databaseAlreadyExistsWithName{name: name, cause: err}
 		}
 
@@ -36,7 +44,6 @@ func (db *rootDB) dropDatabase(ctx context.Context, name string) error {
 	return dropDatabase(ctx, db.db, name)
 }
 
-//nolint:unused
 func (db *rootDB) getAllDatabases(ctx context.Context) ([]string, error) {
 	return getAllDatabases(ctx, db.db)
 }

@@ -6,8 +6,10 @@ import (
 
 type TestDB interface {
 	isTestDB()
+
 	name() string
 	Name() string
+
 	DataSourceName() string
 }
 
@@ -21,6 +23,6 @@ func (db *testDB) name() string {
 }
 func (db *testDB) Name() string { return db.name() }
 
-func (db testDB) DataSourceName() string {
+func (db *testDB) DataSourceName() string {
 	return db.connparams.URI().String()
 }

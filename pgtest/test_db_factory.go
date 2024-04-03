@@ -64,7 +64,6 @@ func (s *testDBFactory) close() {
 	s.rootDB.close()
 }
 
-//nolint:unused
 func (s *testDBFactory) destroyAllTestDBs(ctx context.Context) error {
 	dbNames, err := s.rootDB.getAllDatabases(ctx)
 	if err != nil {
