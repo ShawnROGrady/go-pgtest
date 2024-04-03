@@ -41,7 +41,7 @@ func TestDBFactoryCreateTestDBImmediateSuccess(t *testing.T) {
 		host = "localhost"
 		port = 5432
 
-		paramFactory = func(dbName string, opts ...connparams.Option) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) *connparams.ConnectionParams {
 			return connparams.New(
 				dbName,
 				connparams.WithUser(user),
@@ -115,7 +115,7 @@ func TestDBFactoryCreateTestDBSucceedsSecondTime(t *testing.T) {
 		host = "localhost"
 		port = 5432
 
-		paramFactory = func(dbName string, opts ...connparams.Option) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) *connparams.ConnectionParams {
 			return connparams.New(
 				dbName,
 				connparams.WithUser(user),
@@ -200,7 +200,7 @@ func TestDBFactoryCreateTestDBEventuallyFailsOnAlreadyExists(t *testing.T) {
 		host = "localhost"
 		port = 5432
 
-		paramFactory = func(dbName string, opts ...connparams.Option) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) *connparams.ConnectionParams {
 			return connparams.New(
 				dbName,
 				connparams.WithUser(user),
@@ -268,7 +268,7 @@ func TestDBFactoryDestroyTestDBSuccess(t *testing.T) {
 		randSource = new(sequentialRandSource)
 		rng        = rand.New(randSource)
 
-		paramFactory = func(dbName string, opts ...connparams.Option) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) *connparams.ConnectionParams {
 			return connparams.New(dbName, connparams.WithUser("foo"), connparams.WithHost("localhost"), connparams.WithPort(5432))
 		}
 
@@ -321,7 +321,7 @@ func TestDBFactoryDestroyAllTestDBsSuccess(t *testing.T) {
 		randSource = new(sequentialRandSource)
 		rng        = rand.New(randSource)
 
-		paramFactory = func(dbName string, opts ...connparams.Option) *connparams.ConnectionParams {
+		paramFactory = func(dbName string) *connparams.ConnectionParams {
 			return connparams.New(dbName, connparams.WithUser("foo"), connparams.WithHost("localhost"), connparams.WithPort(5432))
 		}
 

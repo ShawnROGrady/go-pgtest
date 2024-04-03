@@ -11,8 +11,7 @@ EXAMPLES_COMMON_GENERATED_QUERIES_DIR:=$(EXAMPLES_DIR)/common/dbqueries
 default: generate
 
 lint:
-	golangci-lint run
-	golangci-lint run $(EXAMPLES_DIR)/...
+	golangci-lint run ./... $(EXAMPLES_DIR)/...
 
 
 $(EXAMPLES_COMMON_GENERATED_QUERIES_DIR): $(EXAMPLES_GENERATE_COMMON_QUERIES_CONF) $(EXAMPLES_COMMON_MIGRATIONS) $(EXAMPLES_COMMON_QUERIES)

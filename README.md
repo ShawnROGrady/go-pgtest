@@ -17,7 +17,7 @@ have a fairly straightforward package which defines operations around a `users`
 table:
 
 ```go
-package bare_bones
+package example
 
 import (
 	"context"

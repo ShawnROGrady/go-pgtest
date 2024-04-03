@@ -63,7 +63,7 @@ func (r *fakeResource) Valid() error {
 }
 
 var fakeResourceConf = &ResourceConf[*fakeResource]{
-	Create: func(ctx context.Context) (*fakeResource, error) {
+	Create: func(context.Context) (*fakeResource, error) {
 		return new(fakeResource), nil
 	},
 	Destroy: func(x *fakeResource) error {

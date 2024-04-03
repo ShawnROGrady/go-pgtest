@@ -45,7 +45,7 @@ func NewTestClient(t testing.TB) *db.Client {
 	require.NoError(t, err, "failed to connect to db")
 	t.Cleanup(cl.Close)
 
-	require.NoError(t, cl.Migrate(ctx), "failed to run migrations")
+	require.NoError(t, cl.Migrate(), "failed to run migrations")
 	return cl
 }
 

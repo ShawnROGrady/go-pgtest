@@ -95,7 +95,7 @@ func (pool *Pool[T]) removeOwnedResourceLocked(resource *Resource[T]) {
 // when we close the pool. While this is likely not a valid assumption, since
 // we probably want to allow for a graceful shutdown in certain cases, it seems
 // better to stick with the simple approach for now then adjust as needed.
-func (pool *Pool[T]) Close(ctx context.Context) error {
+func (pool *Pool[T]) Close(_ context.Context) error {
 	pool.mut.Lock()
 	defer pool.mut.Unlock()
 

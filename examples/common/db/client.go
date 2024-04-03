@@ -31,7 +31,7 @@ func (cl *Client) queries() *pgxQueries {
 	}
 }
 
-func (cl *Client) Migrate(ctx context.Context) error {
+func (cl *Client) Migrate() error {
 	m, err := common.Migrations().ForPgxPool(cl.pool)
 	if err != nil {
 		return err

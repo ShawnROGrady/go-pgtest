@@ -40,9 +40,9 @@ func newConfig(opts ...Option) (*config, error) {
 		connParamOpts = append(connParamOpts, connparams.WithPassword(p))
 	}
 
-	paramFactory := connparams.Factory(func(dbName string, opts ...connparams.Option) *connparams.ConnectionParams {
+	paramFactory := func(dbName string) *connparams.ConnectionParams {
 		return connparams.DefaultFactory()(dbName, connParamOpts...)
-	})
+	}
 
 	var keepDatabasesForFailed bool
 	if o := os.Getenv("PG_TEST_KEEP_DATABASES_FOR_FAILED"); o != "" {

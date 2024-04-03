@@ -38,7 +38,7 @@ func (test *DBTestSuite) SetupTest() {
 	cl, err := db.Connect(ctx, testDB.DataSourceName())
 	test.Require().NoError(err, "failed to connect to db")
 
-	test.Require().NoError(cl.Migrate(ctx), "failed to run migrations")
+	test.Require().NoError(cl.Migrate(), "failed to run migrations")
 
 	test.client = cl
 }

@@ -1,4 +1,4 @@
-package bare_bones
+package example
 
 import (
 	"context"

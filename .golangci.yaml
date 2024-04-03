@@ -1,3 +1,18 @@
+linters:
+  disable-all: true
+  enable:
+    - errcheck    # Errcheck is a program for checking for unchecked errors in Go code. These unchecked errors can be critical bugs in some cases.
+    - exhaustive  # Check exhaustiveness of enum switch statements.
+    - goimports   # Check import statements are formatted according to the 'goimport' command. Reformat imports in autofix mode. 
+    - gosimple    # Linter for Go source code that specializes in simplifying code.
+    - govet       # Vet examines Go source code and reports suspicious constructs. It is roughly the same as 'go vet' and uses its passes.
+    - ineffassign # Detects when assignments to existing variables are not used.
+    - nolintlint  # Reports ill-formed or insufficient nolint directives.
+    - revive      # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
+    - staticcheck # It's a set of rules from staticcheck. It's not the same thing as the staticcheck binary. The author of staticcheck doesn't support or approve the use of staticcheck as a library inside golangci-lint.
+    - testifylint # Checks usage of github.com/stretchr/testify.
+    - unused      # Checks Go code for unused constants, variables, functions and types.
+
 linters-settings:
   exhaustive:
     explicit-exhaustive-switch: true
@@ -5,7 +20,3 @@ linters-settings:
 issues:
   # Allow linters to run against examples.
   exclude-dirs-use-default: false
-
-linters:
-  enable:
-    - exhaustive

@@ -8,14 +8,12 @@ import (
 	"slices"
 	"strings"
 	"sync"
-
-	"github.com/ShawnROGrady/go-pgtest/pgtest/connparams"
 )
 
 const testDBNamePrefix = "pg_test_"
 
 type testDBFactory struct {
-	paramFactory connparams.Factory
+	paramFactory connparamsFactory
 
 	rootDB *rootDB
 	mut    sync.Mutex
