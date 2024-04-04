@@ -1,8 +1,8 @@
 EXAMPLES_DIR:=./examples
 
 EXAMPLES_GENERATE_COMMON_QUERIES_CONF:=$(EXAMPLES_DIR)/common/sqlc.yaml
-EXAMPLES_COMMON_MIGRATIONS:=$(shell find ./examples/common/migrations -type f)
-EXAMPLES_COMMON_QUERIES:=$(shell find ./examples/common/queries -type f)
+EXAMPLES_COMMON_MIGRATIONS:=$(shell find $(EXAMPLES_DIR)/common/migrations -type f)
+EXAMPLES_COMMON_QUERIES:=$(shell find $(EXAMPLES_DIR)/common/queries -type f)
 EXAMPLES_COMMON_GENERATED_QUERIES_DIR:=$(EXAMPLES_DIR)/common/dbqueries
 
 
@@ -31,7 +31,7 @@ test_examples:
 		    PGTEST_PORT=5400 \
 		    PGTEST_USER='localuser' \
 		    PGTEST_PASSWORD='localpa55w.rd' \
-		    go test ./examples/... -cover -race -count 1 || EXIT_CODE=$$?; \
+		    go test $(EXAMPLES_DIR)/... -cover -race -count 1 || EXIT_CODE=$$?; \
 		    docker container stop pg_15_test; \
 		    exit $$EXIT_CODE
 
