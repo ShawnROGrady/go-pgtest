@@ -24,8 +24,14 @@ jobs:
             go.sum
             examples/go.sum
 
-      - name: "go build"
-        run: go build ./... ./examples/...
+      - name: Build library
+        run: >-
+          go build ./...
+
+      - name: Build examples
+        working-directory: ./examples
+        run: >-
+          go build ./...
 
   lint:
     name: Lint
@@ -38,8 +44,17 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
+          cache-dependency-path: |
+            go.sum
+            examples/go.sum
 
-      - name: "golangci-lint"
+      - name: Lint library
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+
+      - name: Lint examples
+        working-directory: ./examples
         uses: golangci/golangci-lint-action@v4
         with:
           version: latest
@@ -72,9 +87,17 @@ jobs:
             go.sum
             examples/go.sum
 
-      - name: "go test"
+      - name: Test library
         env:
           PGTEST_USER: ${{ env.POSTGRES_USER }}
           PGTEST_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
         run: >-
-          go test ./... ./examples/... --race
+          go test ./... -race
+
+      - name: Test examples
+        env:
+          PGTEST_USER: ${{ env.POSTGRES_USER }}
+          PGTEST_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        working-directory: ./examples
+        run: >-
+          go test ./... -race
