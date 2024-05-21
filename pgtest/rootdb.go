@@ -30,8 +30,13 @@ func (db *rootDB) createDatabase(ctx context.Context, name string) error {
 	query := fmt.Sprintf("CREATE DATABASE %q;", name)
 	if _, err := db.db.Exec(ctx, query); err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.DuplicateDatabase {
-			return &databaseAlreadyExistsWithName{name: name, cause: err}
+		if errors.As(err, &pgErr) {
+			// It seems like either code 42P04 or 23505 can be
+			// returned if a database already exists with the
+			// specified name, so we will treat them the same.
+			if pgErr.Code == pgerrcode.DuplicateDatabase || pgErr.Code == pgerrcode.UniqueViolation {
+				return &databaseAlreadyExistsWithName{name: name, cause: err}
+			}
 		}
 
 		return err
