@@ -85,7 +85,7 @@ jobs:
         env:
           PGTEST_USER: ${{ env.POSTGRES_USER }}
           PGTEST_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          PGTEST_PORT: ${{ job.services.ports[5432] }}
+          PGTEST_PORT: ${{ job.services.postgres.ports[5432] }}
         run: >-
           go test ./... -race
 
@@ -93,7 +93,7 @@ jobs:
         env:
           PGTEST_USER: ${{ env.POSTGRES_USER }}
           PGTEST_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          PGTEST_PORT: ${{ job.services.ports[5432] }}
+          PGTEST_PORT: ${{ job.services.postgres.ports[5432] }}
         working-directory: ./examples
         run: >-
           go test ./... -race
