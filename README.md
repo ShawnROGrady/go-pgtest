@@ -6,6 +6,11 @@ Internally this package provides high level utilities for managing real
 postgres databases for integration tests, with support for both creating a new
 database per-test and using a pool of databases across tests.
 
+## Project Status
+
+There is no further work planned on this repository, as I have since switched
+to using https://github.com/peterldowns/pgtestdb.
+
 ## Usage
 
 Generally the preferred usage is to re-use databases across tests. Particularly
